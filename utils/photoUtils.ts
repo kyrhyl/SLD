@@ -30,8 +30,8 @@ export async function extractGPSFromPhoto(file: File): Promise<GPSCoordinates | 
     const gpsAltitude = tags['GPSAltitude'];
 
     if (gpsLatitude && gpsLongitude && Array.isArray(gpsLatitude.value) && Array.isArray(gpsLongitude.value)) {
-      const latitude = convertDMSToDecimal(gpsLatitude.value as unknown as [number, number, number]);
-      const longitude = convertDMSToDecimal(gpsLongitude.value as unknown as [number, number, number]);
+      const latitude = convertDMSToDecimal(gpsLatitude.value);
+      const longitude = convertDMSToDecimal(gpsLongitude.value);
 
       return {
         latitude,
@@ -59,8 +59,8 @@ export async function extractPhotoMetadata(file: File): Promise<PhotoMetadata> {
     const gpsAltitude = tags['GPSAltitude'];
 
     const gps: GPSCoordinates | undefined = gpsLatitude && gpsLongitude && Array.isArray(gpsLatitude.value) && Array.isArray(gpsLongitude.value) ? {
-      latitude: convertDMSToDecimal(gpsLatitude.value as unknown as [number, number, number]),
-      longitude: convertDMSToDecimal(gpsLongitude.value as unknown as [number, number, number]),
+      latitude: convertDMSToDecimal(gpsLatitude.value),
+      longitude: convertDMSToDecimal(gpsLongitude.value),
       altitude: gpsAltitude && typeof gpsAltitude.value === 'number' ? gpsAltitude.value : undefined
     } : undefined;
 
@@ -121,13 +121,24 @@ export function isNearRoadSegment(
 
 /**
  * Convert GPS coordinates from DMS (Degrees, Minutes, Seconds) to decimal degrees
+ * Handles EXIF rational number format where each component is [numerator, denominator]
  */
-function convertDMSToDecimal(dms: number[]): number {
-  const degrees = dms[0];
-  const minutes = dms[1];
-  const seconds = dms[2];
+function convertDMSToDecimal(dms: any): number {
+  // EXIF GPS data is stored as rational numbers: [[num, den], [num, den], [num, den]]
+  if (Array.isArray(dms) && dms.length === 3) {
+    const degrees = Array.isArray(dms[0]) ? dms[0][0] / dms[0][1] : dms[0];
+    const minutes = Array.isArray(dms[1]) ? dms[1][0] / dms[1][1] : dms[1];
+    const seconds = Array.isArray(dms[2]) ? dms[2][0] / dms[2][1] : dms[2];
 
-  return degrees + (minutes / 60) + (seconds / 3600);
+    return degrees + (minutes / 60) + (seconds / 3600);
+  }
+
+  // Fallback for already converted decimal format
+  if (typeof dms === 'number') {
+    return dms;
+  }
+
+  throw new Error('Invalid DMS format');
 }
 
 /**
