@@ -1,5 +1,3 @@
-import ExifReader from 'exifreader';
-
 export interface GPSCoordinates {
   latitude: number;
   longitude: number;
@@ -23,6 +21,8 @@ export interface PhotoMetadata {
  */
 export async function extractGPSFromPhoto(file: File): Promise<GPSCoordinates | null> {
   try {
+    const { default: ExifReader } = await import('exifreader');
+
     const tags = await ExifReader.load(file);
 
     const gpsLatitude = tags['GPSLatitude'];
@@ -52,6 +52,8 @@ export async function extractGPSFromPhoto(file: File): Promise<GPSCoordinates | 
  */
 export async function extractPhotoMetadata(file: File): Promise<PhotoMetadata> {
   try {
+    const { default: ExifReader } = await import('exifreader');
+
     const tags = await ExifReader.load(file);
 
     const gpsLatitude = tags['GPSLatitude'];
