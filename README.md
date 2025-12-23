@@ -16,6 +16,21 @@ An interactive Next.js application for visualizing road inventory data, includin
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
 
+## Geotagged Photos
+
+### Photo Upload Features
+- **GPS Coordinate Extraction**: Automatically reads latitude/longitude from photo EXIF data
+- **Metadata Display**: Shows camera info, timestamp, image dimensions
+- **Location Association**: Links photos to nearest road stations
+- **Batch Upload**: Upload multiple photos simultaneously
+- **Format Support**: JPEG, PNG, TIFF, HEIC with GPS metadata
+
+### GPS Data Integration
+- **Automatic Station Matching**: Photos with GPS data can be linked to road segments
+- **Coordinate Display**: Shows precise latitude/longitude with altitude when available
+- **Accuracy Information**: Displays GPS positioning accuracy when available
+- **Location Validation**: Verifies if photo location is near road segments
+
 ## Interactive Controls
 
 ### Station Range Slider

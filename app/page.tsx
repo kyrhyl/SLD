@@ -1,6 +1,7 @@
 'use client';
 
 import StraightLineDiagram from '@/components/StraightLineDiagram';
+import PhotoUpload from '@/components/PhotoUpload';
 import { sampleRoadData } from '@/data/sampleData';
 import { useState } from 'react';
 import { RoadInventoryData, RoadSegment, ProjectStation, FundingRelease } from '@/types/road';
@@ -214,6 +215,21 @@ export default function Home() {
             stationRange={stationRange}
             surfaceTypeFilter={surfaceTypeFilter}
             fundingStatusFilter={fundingStatusFilter}
+          />
+        </div>
+
+        {/* Photo Upload Section */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">📸 Road Photo Management</h2>
+          <p className="text-gray-600 mb-4">
+            Upload geotagged photos to associate with road segments and stations
+          </p>
+          <PhotoUpload
+            onPhotoProcessed={(metadata) => {
+              console.log('Photo processed:', metadata);
+              // Here you could automatically associate photos with nearby stations
+              // or add them to the road inventory data
+            }}
           />
         </div>
 
