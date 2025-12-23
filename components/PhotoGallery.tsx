@@ -45,7 +45,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos: initialPhotos = [] 
           <div className="flex flex-col md:flex-row">
             <div className="flex-1 p-4">
               <img
-                src={photo.filepath ? `/api/uploads/${photo.uploadedFilename}` : ''}
+                src={photo.filepath ? `/api/uploads/${encodeURIComponent(photo.uploadedFilename || '')}` : ''}
                 alt={photo.filename}
                 className="w-full h-auto max-h-[60vh] object-contain rounded"
               />
@@ -130,7 +130,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos: initialPhotos = [] 
             >
               <div className="aspect-square overflow-hidden">
                 <img
-                  src={photo.filepath ? `/api/uploads/${photo.uploadedFilename}` : ''}
+                  src={photo.filepath ? `/api/uploads/${encodeURIComponent(photo.uploadedFilename || '')}` : ''}
                   alt={photo.filename}
                   className="w-full h-full object-cover hover:scale-105 transition-transform"
                   loading="lazy"

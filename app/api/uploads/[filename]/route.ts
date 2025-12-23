@@ -4,15 +4,14 @@ import { join } from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    const { path } = await params;
-    const filepath = path.join('/');
-    const fullPath = join(process.cwd(), 'uploads', filepath);
+    const { filename } = await params;
+    const fullPath = join(process.cwd(), 'uploads', filename);
 
     const file = await readFile(fullPath);
-    const ext = filepath.split('.').pop()?.toLowerCase();
+    const ext = filename.split('.').pop()?.toLowerCase();
 
     // Set appropriate content type based on file extension
     const contentType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :

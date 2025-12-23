@@ -279,6 +279,7 @@ export default function Home() {
                       ? 'bg-blue-600 text-white'
                       : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                   }`}
+                  suppressHydrationWarning
                 >
                   {editMode === 'segments' ? 'Exit Edit' : 'Edit'}
                 </button>
@@ -286,6 +287,7 @@ export default function Home() {
                   <button
                     onClick={addSegment}
                     className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                    suppressHydrationWarning
                   >
                     + Add Segment
                   </button>
@@ -411,6 +413,7 @@ export default function Home() {
                       ? 'bg-purple-600 text-white'
                       : 'bg-purple-100 text-purple-800 hover:bg-purple-200'
                   }`}
+                  suppressHydrationWarning
                 >
                   {editMode === 'funding' ? 'Exit Edit' : 'Edit'}
                 </button>
@@ -418,6 +421,7 @@ export default function Home() {
                   <button
                     onClick={addFunding}
                     className="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
+                    suppressHydrationWarning
                   >
                     + Add Funding
                   </button>
@@ -546,6 +550,7 @@ export default function Home() {
                       ? 'bg-green-600 text-white'
                       : 'bg-green-100 text-green-800 hover:bg-green-200'
                   }`}
+                  suppressHydrationWarning
                 >
                   {editMode === 'stations' ? 'Exit Edit' : 'Edit'}
                 </button>
@@ -553,6 +558,7 @@ export default function Home() {
                   <button
                     onClick={addStation}
                     className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                    suppressHydrationWarning
                   >
                     + Add Station
                   </button>
