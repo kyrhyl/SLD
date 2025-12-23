@@ -1,4 +1,4 @@
-import { exifr } from 'exifr';
+import ExifReader from 'exifreader';
 
 export interface GPSCoordinates {
   latitude: number;
@@ -23,18 +23,20 @@ export interface PhotoMetadata {
  */
 export async function extractGPSFromPhoto(file: File): Promise<GPSCoordinates | null> {
   try {
-    const exifData = await exifr.parse(file, {
-      gps: true,
-      tiff: true,
-      exif: true
-    });
+    const tags = await ExifReader.load(file);
 
-    if (exifData && exifData.latitude && exifData.longitude) {
+    const gpsLatitude = tags['GPSLatitude'];
+    const gpsLongitude = tags['GPSLongitude'];
+    const gpsAltitude = tags['GPSAltitude'];
+
+    if (gpsLatitude && gpsLongitude && Array.isArray(gpsLatitude.value) && Array.isArray(gpsLongitude.value)) {
+      const latitude = convertDMSToDecimal(gpsLatitude.value as unknown as [number, number, number]);
+      const longitude = convertDMSToDecimal(gpsLongitude.value as unknown as [number, number, number]);
+
       return {
-        latitude: exifData.latitude,
-        longitude: exifData.longitude,
-        altitude: exifData.GPSAltitude || undefined,
-        accuracy: exifData.GPSHPositioningError || undefined
+        latitude,
+        longitude,
+        altitude: gpsAltitude && typeof gpsAltitude.value === 'number' ? gpsAltitude.value : undefined
       };
     }
 
@@ -50,30 +52,38 @@ export async function extractGPSFromPhoto(file: File): Promise<GPSCoordinates | 
  */
 export async function extractPhotoMetadata(file: File): Promise<PhotoMetadata> {
   try {
-    const exifData = await exifr.parse(file, {
-      gps: true,
-      tiff: true,
-      exif: true,
-      ifd0: true,
-      ifd1: true
-    });
+    const tags = await ExifReader.load(file);
 
-    const gps: GPSCoordinates | undefined = exifData?.latitude && exifData?.longitude ? {
-      latitude: exifData.latitude,
-      longitude: exifData.longitude,
-      altitude: exifData.GPSAltitude || undefined,
-      accuracy: exifData.GPSHPositioningError || undefined
+    const gpsLatitude = tags['GPSLatitude'];
+    const gpsLongitude = tags['GPSLongitude'];
+    const gpsAltitude = tags['GPSAltitude'];
+
+    const gps: GPSCoordinates | undefined = gpsLatitude && gpsLongitude && Array.isArray(gpsLatitude.value) && Array.isArray(gpsLongitude.value) ? {
+      latitude: convertDMSToDecimal(gpsLatitude.value as unknown as [number, number, number]),
+      longitude: convertDMSToDecimal(gpsLongitude.value as unknown as [number, number, number]),
+      altitude: gpsAltitude && typeof gpsAltitude.value === 'number' ? gpsAltitude.value : undefined
+    } : undefined;
+
+    const dateTime = tags['DateTimeOriginal'] || tags['DateTime'];
+    const timestamp = dateTime && typeof dateTime.value === 'string' ? parseExifDate(dateTime.value) : undefined;
+
+    const make = tags['Make'];
+    const model = tags['Model'];
+    const camera = make && model && typeof make.value === 'string' && typeof model.value === 'string' ? `${make.value} ${model.value}` : undefined;
+
+    const width = tags['ImageWidth'] || tags['ExifImageWidth'];
+    const height = tags['ImageHeight'] || tags['ExifImageHeight'];
+    const dimensions = width && height && typeof width.value === 'number' && typeof height.value === 'number' ? {
+      width: width.value,
+      height: height.value
     } : undefined;
 
     return {
       filename: file.name,
       gps,
-      timestamp: exifData?.DateTimeOriginal || exifData?.DateTime || undefined,
-      camera: exifData?.Make && exifData?.Model ? `${exifData.Make} ${exifData.Model}` : undefined,
-      dimensions: exifData?.ImageWidth && exifData?.ImageHeight ? {
-        width: exifData.ImageWidth,
-        height: exifData.ImageHeight
-      } : undefined
+      timestamp,
+      camera,
+      dimensions
     };
   } catch (error) {
     console.error('Error extracting photo metadata:', error);
@@ -107,4 +117,39 @@ export function isNearRoadSegment(
   // to determine if GPS point is within tolerance of the road segment
   console.log(`Checking if GPS ${gps.latitude}, ${gps.longitude} is near segment ${segmentStart}-${segmentEnd}km`);
   return true; // Placeholder
+}
+
+/**
+ * Convert GPS coordinates from DMS (Degrees, Minutes, Seconds) to decimal degrees
+ */
+function convertDMSToDecimal(dms: number[]): number {
+  const degrees = dms[0];
+  const minutes = dms[1];
+  const seconds = dms[2];
+
+  return degrees + (minutes / 60) + (seconds / 3600);
+}
+
+/**
+ * Parse EXIF date string to Date object
+ */
+function parseExifDate(dateString: string): Date | undefined {
+  try {
+    // EXIF date format: "YYYY:MM:DD HH:MM:SS"
+    const match = dateString.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+    if (match) {
+      const [, year, month, day, hour, minute, second] = match;
+      return new Date(
+        parseInt(year),
+        parseInt(month) - 1, // Month is 0-indexed in Date
+        parseInt(day),
+        parseInt(hour),
+        parseInt(minute),
+        parseInt(second)
+      );
+    }
+  } catch (error) {
+    console.error('Error parsing EXIF date:', error);
+  }
+  return undefined;
 }
