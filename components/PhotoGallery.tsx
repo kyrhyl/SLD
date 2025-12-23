@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PhotoMetadata, GPSCoordinates } from '@/utils/photoUtils';
 
 interface PhotoGalleryProps {
@@ -8,12 +8,11 @@ interface PhotoGalleryProps {
 }
 
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos: initialPhotos = [] }) => {
-  const [photos, setPhotos] = useState<PhotoMetadata[]>(initialPhotos);
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoMetadata | null>(null);
   const [filterByGPS, setFilterByGPS] = useState(false);
 
-  // In a real app, you might fetch photos from an API
-  // For now, we'll use the photos passed as props or stored locally
+  // Use props directly instead of local state
+  const photos = initialPhotos;
 
   const formatGPS = (gps?: GPSCoordinates): string => {
     if (!gps) return 'No GPS data';
@@ -28,6 +27,9 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos: initialPhotos = [] 
   const filteredPhotos = filterByGPS
     ? photos.filter(photo => photo.gps)
     : photos;
+
+  console.log('PhotoGallery rendering with photos:', photos);
+  console.log('Filtered photos:', filteredPhotos);
 
   const PhotoModal: React.FC<{ photo: PhotoMetadata; onClose: () => void }> = ({ photo, onClose }) => {
     return (
@@ -134,6 +136,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos: initialPhotos = [] 
                   alt={photo.filename}
                   className="w-full h-full object-cover hover:scale-105 transition-transform"
                   loading="lazy"
+                  onError={(e) => console.log('Image failed to load:', photo.uploadedFilename, e)}
                 />
               </div>
               <div className="p-3">

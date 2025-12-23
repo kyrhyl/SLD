@@ -23,6 +23,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoProcessed, stationKm }
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.type.startsWith('image/')) {
+        console.log('Processing file:', file.name);
         try {
           // First, upload the file to the server
           const formData = new FormData();
@@ -46,9 +47,11 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoProcessed, stationKm }
           metadata.filepath = uploadResult.path;
           metadata.uploadedFilename = uploadResult.filename;
 
+          console.log('Created metadata:', metadata);
           newPhotos.push(metadata);
 
           if (onPhotoProcessed) {
+            console.log('PhotoUpload calling onPhotoProcessed with:', metadata);
             onPhotoProcessed(metadata);
           }
         } catch (error) {

@@ -229,8 +229,12 @@ export default function Home() {
           </p>
           <PhotoUpload
             onPhotoProcessed={(metadata) => {
-              setUploadedPhotos(prev => [...prev, metadata]);
-              console.log('Photo processed:', metadata);
+              console.log('Main page received photo:', metadata);
+              setUploadedPhotos(prev => {
+                const newPhotos = [...prev, metadata];
+                console.log('Updated uploadedPhotos state:', newPhotos);
+                return newPhotos;
+              });
               // Here you could automatically associate photos with nearby stations
               // or add them to the road inventory data
             }}
