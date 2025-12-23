@@ -24,7 +24,28 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoProcessed, stationKm }
       const file = files[i];
       if (file.type.startsWith('image/')) {
         try {
+          // First, upload the file to the server
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload file');
+          }
+
+          const uploadResult = await uploadResponse.json();
+          console.log('File uploaded:', uploadResult);
+
+          // Then extract metadata
           const metadata = await extractPhotoMetadata(file);
+          // Add the server path to the metadata
+          metadata.filepath = uploadResult.path;
+          metadata.uploadedFilename = uploadResult.filename;
+
           newPhotos.push(metadata);
 
           if (onPhotoProcessed) {
@@ -77,14 +98,9 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoProcessed, stationKm }
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
                   <img
-                    src={URL.createObjectURL(new File([], photo.filename))} // Placeholder
+                    src={photo.filepath ? `/uploads/${photo.uploadedFilename}` : URL.createObjectURL(new File([], photo.filename))}
                     alt={photo.filename}
                     className="w-20 h-20 object-cover rounded border"
-                    onLoad={(e) => {
-                      // In a real implementation, you'd load the actual image
-                      const target = e.target as HTMLImageElement;
-                      // target.src = actualImageUrl;
-                    }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">

@@ -7,6 +7,8 @@ export interface GPSCoordinates {
 
 export interface PhotoMetadata {
   filename: string;
+  filepath?: string;
+  uploadedFilename?: string;
   gps?: GPSCoordinates;
   timestamp?: Date;
   camera?: string;
