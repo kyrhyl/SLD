@@ -2,9 +2,11 @@
 
 import StraightLineDiagram from '@/components/StraightLineDiagram';
 import PhotoUpload from '@/components/PhotoUpload';
+import PhotoGallery from '@/components/PhotoGallery';
 import { sampleRoadData } from '@/data/sampleData';
 import { useState } from 'react';
 import { RoadInventoryData, RoadSegment, ProjectStation, FundingRelease } from '@/types/road';
+import { PhotoMetadata } from '@/utils/photoUtils';
 
 export default function Home() {
   const [data, setData] = useState<RoadInventoryData>(sampleRoadData);
@@ -12,6 +14,7 @@ export default function Home() {
   const [surfaceTypeFilter, setSurfaceTypeFilter] = useState<string>('all');
   const [fundingStatusFilter, setFundingStatusFilter] = useState<string>('all');
   const [editMode, setEditMode] = useState<'segments' | 'stations' | 'funding' | null>(null);
+  const [uploadedPhotos, setUploadedPhotos] = useState<PhotoMetadata[]>([]);
 
   const surfaceTypes = ['all', 'asphalt', 'concrete', 'gravel', 'unpaved'];
   const fundingStatuses = ['all', 'completed', 'ongoing', 'planned'];
@@ -226,11 +229,21 @@ export default function Home() {
           </p>
           <PhotoUpload
             onPhotoProcessed={(metadata) => {
+              setUploadedPhotos(prev => [...prev, metadata]);
               console.log('Photo processed:', metadata);
               // Here you could automatically associate photos with nearby stations
               // or add them to the road inventory data
             }}
           />
+        </div>
+
+        {/* Photo Gallery Section */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">🖼️ Photo Gallery</h2>
+          <p className="text-gray-600 mb-4">
+            Browse all uploaded photos with GPS data and metadata
+          </p>
+          <PhotoGallery photos={uploadedPhotos} />
         </div>
 
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
